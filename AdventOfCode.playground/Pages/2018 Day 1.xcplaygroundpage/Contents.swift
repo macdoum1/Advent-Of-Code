@@ -24,19 +24,13 @@ deltas = deltasFromFilename("input-pt2")
 frequency = 0
 
 var frequenciesReached = [Int: Bool]()
-
-var duplicateFrequencyFound = false
 var i = 0
-while !duplicateFrequencyFound {
+// Keep iterating until the current frequency has a true
+// value within the map
+while !(frequenciesReached[frequency] ?? false) {
     let delta = deltas[(i % deltas.count + deltas.count) % deltas.count]
-    frequency += delta
-    
-    if frequenciesReached[frequency] ?? false {
-        duplicateFrequencyFound = true
-    }
-    
     frequenciesReached[frequency] = true
-    
+    frequency += delta
     i += 1
 }
 frequency
