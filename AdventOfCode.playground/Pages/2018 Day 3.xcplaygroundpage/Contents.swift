@@ -5,22 +5,30 @@ import Foundation
 // Day 3
 // https://adventofcode.com/2018/day/3
 
-
 // *** Shared ***
-func claimStringsFromFilename(_ filename: String) -> [String] {
-    let fileURL = Bundle.main.url(forResource: filename, withExtension: "txt")
-    let content = (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
-    return content.split(separator: "\n").compactMap { return String($0) }
-}
-
-let claimStrings = claimStringsFromFilename("input-pt1")
-
 struct Claim {
     let id: String
-    let leftInset: Int
-    let topInset: Int
-    let width: Int
-    let height: Int
+    private let leftInset: Int
+    private let topInset: Int
+    private let width: Int
+    private let height: Int
+    
+    var xStart: Int {
+        return leftInset
+    }
+    
+    var xEnd: Int {
+        return leftInset + width
+    }
+    
+    var yStart: Int {
+        return topInset
+    }
+    
+    var yEnd: Int {
+        return topInset + height
+    }
+    
     init(string: String) {
         var santizedString = string.replacingOccurrences(of: " @", with: "")
         santizedString = santizedString.replacingOccurrences(of: ",", with: " ")
@@ -36,46 +44,58 @@ struct Claim {
     }
 }
 
-struct FabricClaim {
-    var claims: [Claim] = []
+func claimsFromFilename(_ filename: String) -> [Claim] {
+    let fileURL = Bundle.main.url(forResource: filename, withExtension: "txt")
+    let content = (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
+    return content.split(separator: "\n").compactMap { return Claim(string: String($0)) }
 }
 
-let claims = claimStrings.map { Claim(string: $0) }
+var claims = claimsFromFilename("input-pt1")
 let totalWidth = 1000
 let totalHeight = 1000
-
 
 // *** Part 1 ***
 var fabric = Array(repeating: Array(repeating: 0, count: totalWidth), count: totalHeight)
 
 for claim in claims {
-    let xStart = claim.leftInset
-    let xEnd = claim.leftInset + claim.width
-    let yStart = claim.topInset
-    let yEnd = claim.topInset + claim.height
-    
-    for x in xStart..<xEnd {
-        for y in yStart..<yEnd {
+    for x in claim.xStart..<claim.xEnd {
+        for y in claim.yStart..<claim.yEnd {
             fabric[x][y] += 1
         }
     }
 }
 
-var count = 0
-for x in 0...fabric.count-1 {
-    let row = fabric[x]
-    for y in 0...row.count-1 {
-        if fabric[x][y] >= 2 {
-            count += 1
+var squareInchesOverlapped = 0
+for (_, row) in fabric.enumerated() {
+    for (_, value) in row.enumerated() {
+        if value >= 2 {
+            squareInchesOverlapped += 1
+        }
+    }
+}
+squareInchesOverlapped
+
+// *** Part 2 ***
+claims = claimsFromFilename("input-pt2")
+
+var fabricWithIds = Array(repeating: Array(repeating: "", count: totalWidth), count: totalHeight)
+var intersectedClaimIds = Set<String>()
+
+for claim in claims {
+    for x in claim.xStart..<claim.xEnd {
+        for y in claim.yStart..<claim.yEnd {
+            let existingId = fabricWithIds[x][y]
+            
+            if existingId != "" {
+                intersectedClaimIds.insert(claim.id)
+                intersectedClaimIds.insert(existingId)
+            }
+            
+            fabricWithIds[x][y] = claim.id
         }
     }
 }
 
-count
-
-
-// *** Part 2 ***
-
-
-
+let allClaimIds = Set<String>( claims.map { $0.id })
+let nonIntersectedClaimIds = allClaimIds.subtracting(intersectedClaimIds)
 //: [Next](@next)
