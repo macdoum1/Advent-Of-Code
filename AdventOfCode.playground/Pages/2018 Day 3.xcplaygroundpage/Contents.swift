@@ -42,6 +42,15 @@ struct Claim {
         width = Int(components[3])!
         height = Int(components[4])!
     }
+    
+    // Can we do this with Sequence/Iterable?
+    func iterate(_ iterate: ((Int, Int) -> Void)) {
+        for x in xStart..<xEnd {
+            for y in yStart..<yEnd {
+                iterate(x, y)
+            }
+        }
+    }
 }
 
 func claimsFromFilename(_ filename: String) -> [Claim] {
@@ -58,10 +67,8 @@ let totalHeight = 1000
 var fabric = Array(repeating: Array(repeating: 0, count: totalWidth), count: totalHeight)
 
 for claim in claims {
-    for x in claim.xStart..<claim.xEnd {
-        for y in claim.yStart..<claim.yEnd {
-            fabric[x][y] += 1
-        }
+    claim.iterate { (x, y) in
+        fabric[x][y] += 1
     }
 }
 
@@ -82,17 +89,15 @@ var fabricWithIds = Array(repeating: Array(repeating: "", count: totalWidth), co
 var intersectedClaimIds = Set<String>()
 
 for claim in claims {
-    for x in claim.xStart..<claim.xEnd {
-        for y in claim.yStart..<claim.yEnd {
-            let existingId = fabricWithIds[x][y]
-            
-            if existingId != "" {
-                intersectedClaimIds.insert(claim.id)
-                intersectedClaimIds.insert(existingId)
-            }
-            
-            fabricWithIds[x][y] = claim.id
+    claim.iterate { (x, y) in
+        let existingId = fabricWithIds[x][y]
+        
+        if existingId != "" {
+            intersectedClaimIds.insert(claim.id)
+            intersectedClaimIds.insert(existingId)
         }
+        
+        fabricWithIds[x][y] = claim.id
     }
 }
 
