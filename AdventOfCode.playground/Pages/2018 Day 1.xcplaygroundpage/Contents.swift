@@ -12,15 +12,10 @@ func deltasFromFilename(_ filename: String) -> [Int] {
 }
 
 // *** Part 1 ***
-var deltas = deltasFromFilename("input-pt1")
-var frequency = 0
-for delta in deltas {
-    frequency += delta
-}
-frequency
+var frequency = deltasFromFilename("input-pt1").reduce(0, +)
 
 // *** Part 2 ***
-deltas = deltasFromFilename("input-pt2")
+let deltas = deltasFromFilename("input-pt2")
 frequency = 0
 
 var frequenciesReached = [Int: Bool]()
