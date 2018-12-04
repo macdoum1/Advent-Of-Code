@@ -3,62 +3,27 @@
    version = "3.0">
    <TimelineItems>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=77&amp;EndingColumnNumber=18&amp;EndingLineNumber=7&amp;StartingColumnNumber=18&amp;StartingLineNumber=7&amp;Timestamp=565634880.693447"
+         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=73&amp;EndingColumnNumber=18&amp;EndingLineNumber=5&amp;StartingColumnNumber=18&amp;StartingLineNumber=5&amp;Timestamp=565657802.555028"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=77&amp;EndingColumnNumber=18&amp;EndingLineNumber=7&amp;StartingColumnNumber=18&amp;StartingLineNumber=7&amp;Timestamp=565634880.693593"
+         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=73&amp;EndingColumnNumber=18&amp;EndingLineNumber=5&amp;StartingColumnNumber=18&amp;StartingLineNumber=5&amp;Timestamp=565657802.555141"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=2818&amp;CharacterRangeLoc=2493&amp;EndingColumnNumber=0&amp;EndingLineNumber=192&amp;StartingColumnNumber=46&amp;StartingLineNumber=87&amp;Timestamp=565634880.693688"
+         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=2266&amp;CharacterRangeLoc=3211&amp;EndingColumnNumber=0&amp;EndingLineNumber=190&amp;StartingColumnNumber=47&amp;StartingLineNumber=111&amp;Timestamp=565657802.555254"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=39&amp;CharacterRangeLoc=3800&amp;EndingColumnNumber=44&amp;EndingLineNumber=136&amp;StartingColumnNumber=5&amp;StartingLineNumber=136&amp;Timestamp=565634880.693774"
-         lockedSize = "{847, 155}"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=16&amp;CharacterRangeLoc=4183&amp;EndingColumnNumber=0&amp;EndingLineNumber=149&amp;StartingColumnNumber=1&amp;StartingLineNumber=148&amp;Timestamp=565634880.693863"
-         lockedSize = "{383, 494}"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=16&amp;CharacterRangeLoc=3494&amp;EndingColumnNumber=21&amp;EndingLineNumber=125&amp;StartingColumnNumber=5&amp;StartingLineNumber=125&amp;Timestamp=565634880.693998"
-         lockedSize = "{521, 155}"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=11&amp;CharacterRangeLoc=3314&amp;EndingColumnNumber=0&amp;EndingLineNumber=119&amp;StartingColumnNumber=1&amp;StartingLineNumber=118&amp;Timestamp=565634880.69415"
-         lockedSize = "{812, 155}"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=18&amp;CharacterRangeLoc=3445&amp;EndingColumnNumber=0&amp;EndingLineNumber=123&amp;StartingColumnNumber=1&amp;StartingLineNumber=122&amp;Timestamp=565634880.694348"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=12&amp;CharacterRangeLoc=2925&amp;EndingColumnNumber=0&amp;EndingLineNumber=106&amp;StartingColumnNumber=1&amp;StartingLineNumber=105&amp;Timestamp=565634880.6944489"
-         lockedSize = "{757, 155}"
-         selectedRepresentationIndex = "0"
-         shouldTrackSuperviewWidth = "NO">
-      </LoggerValueHistoryTimelineItem>
-      <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=5&amp;CharacterRangeLoc=3994&amp;EndingColumnNumber=14&amp;EndingLineNumber=140&amp;StartingColumnNumber=9&amp;StartingLineNumber=140&amp;Timestamp=565634880.694566"
+         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=4325&amp;EndingColumnNumber=59&amp;EndingLineNumber=145&amp;StartingColumnNumber=59&amp;StartingLineNumber=145&amp;Timestamp=565657802.555357"
          selectedRepresentationIndex = "2"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=3&amp;CharacterRangeLoc=4034&amp;EndingColumnNumber=12&amp;EndingLineNumber=141&amp;StartingColumnNumber=9&amp;StartingLineNumber=141&amp;Timestamp=565634880.694645"
+         documentLocation = "file:///Users/mmacdougall/Documents/Projects/Advent-Of-Code/AdventOfCode.playground/Pages/2018%20Day%204.xcplaygroundpage#CharacterRangeLen=0&amp;CharacterRangeLoc=4325&amp;EndingColumnNumber=59&amp;EndingLineNumber=145&amp;StartingColumnNumber=59&amp;StartingLineNumber=145&amp;Timestamp=565657802.5554349"
          selectedRepresentationIndex = "2"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>

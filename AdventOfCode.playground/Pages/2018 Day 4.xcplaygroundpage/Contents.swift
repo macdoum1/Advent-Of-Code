@@ -1,9 +1,7 @@
 //: [Previous](@previous)
-
 import Foundation
 
 // Day 4
-//
 
 /// *** Shared ***
 struct GuardUpdate {
@@ -39,7 +37,6 @@ struct GuardUpdate {
     private static func dateFromString(_ string: String) -> Date {
         var sanitizedString = string.replacingOccurrences(of: "[", with: "")
         sanitizedString = String(sanitizedString.split(separator: "]").first!)
-        //[1518-11-01 00:00
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         
@@ -63,6 +60,14 @@ struct SleepRange {
     var numberOfMinutes: Int {
         return Int(end.timeIntervalSince(start)/60)
     }
+    
+    func iterateMinutes(_ iterate: ((Int) -> Void)) {
+        let startMinute = start.minute
+        let endMinute = end.minute
+        for i in startMinute..<endMinute {
+            iterate(i)
+        }
+    }
 }
 
 extension Date {
@@ -82,51 +87,52 @@ func updatesFromFilename(_ filename: String) -> [GuardUpdate] {
         let update = GuardUpdate(string: string)
         updates.append(update)
     }
+    
+    // The input isn't always sorted
+    updates.sort { (updateA, updateB) -> Bool in
+        return updateA.timestamp < updateB.timestamp
+    }
+    
+    // We want all updates to have the guardId
+    // for convenience
+    var lastGuardId: Int? = updates.first?.guardId
+    updates = updates.map({ (update) -> GuardUpdate in
+        if let guardId = update.guardId {
+            lastGuardId = guardId
+        }
+        
+        var newUpdate = update
+        newUpdate.guardId = lastGuardId
+        return newUpdate
+    })
+    
     return updates
 }
 
-var updates = updatesFromFilename("input-pt1").sorted { (updateA, updateB) -> Bool in
-    return updateA.timestamp < updateB.timestamp
-}
+var updates = updatesFromFilename("test-input")
 
-var lastGuardId: Int? = updates.first?.guardId
-
-updates = updates.map({ (update) -> GuardUpdate in
-    if let guardId = update.guardId {
-        lastGuardId = guardId
-    }
-    
-    var newUpdate = update
-    newUpdate.guardId = lastGuardId
-    return newUpdate
-})
 // *** Part 1 ***
 let sleepUpdates = updates.filter { $0.isSleepChange }
-
 sleepUpdates
-
-sleepUpdates.count
 
 let sleepRanges = stride(from: 0, to: sleepUpdates.count-1, by: 2).compactMap { (i) -> SleepRange? in
     let start = sleepUpdates[i]
     let end = sleepUpdates[i+1]
     
-    guard start.action == .fallAsleep, end.action == .wakesUp else { return nil }
-    
+    guard start.action == .fallAsleep, end.action == .wakesUp else {
+        fatalError("A fall asleep action was not followed by a wakeup action")
+    }
     
     return SleepRange(start: start.timestamp, end: end.timestamp, guardId: start.guardId)
 }
 sleepRanges
-sleepRanges.count
 
 let sleepRangesByGuard: [Int: [SleepRange]] = Dictionary(grouping: sleepRanges, by: { $0.guardId })
 sleepRangesByGuard
-sleepRangesByGuard.count
 
 let sleepTimeByGuard = sleepRangesByGuard.mapValues { (sleepRanges) -> Int in
     return sleepRanges.map { $0.numberOfMinutes }.reduce(0, +)
 }
-sleepRangesByGuard.count
 
 let guardWithLongestSleepTime = sleepTimeByGuard.max { (a, b) -> Bool in
     return a.value < b.value
@@ -138,40 +144,32 @@ let sleepRangesForGuardWithLongestSleepTime = sleepRangesByGuard[guardWithLonges
 
 var minuteToCountMap = [Int: Int]()
 for sleepRange in sleepRangesForGuardWithLongestSleepTime {
-    let start = sleepRange.start.minute
-    let end = sleepRange.end.minute
-    for i in start..<end {
+    sleepRange.iterateMinutes { (i) in
         let count = minuteToCountMap[i] ?? 0
         minuteToCountMap[i] = count + 1
     }
 }
-
 minuteToCountMap
-
-sleepRangesForGuardWithLongestSleepTime
 
 let mostSleptAtMinuteForSleepiestGuard = minuteToCountMap.max { (a, b) -> Bool in
     return a.value < b.value
 }!.key
-
 mostSleptAtMinuteForSleepiestGuard
 
 let result = guardWithLongestSleepTime * mostSleptAtMinuteForSleepiestGuard
-
 result
-// *** Part 2 ***
 
+// *** Part 2 ***
 var sameMinuteGuard: (guardId: Int, minute: Int, countForMinute: Int) = (0, 0, 0)
 for (guardId, sleepRanges) in sleepRangesByGuard {
     var minuteToCountMap = [Int: Int]()
     for sleepRange in sleepRanges {
-        let start = sleepRange.start.minute
-        let end = sleepRange.end.minute
-        for i in start..<end {
+        sleepRange.iterateMinutes { (i) in
             let count = minuteToCountMap[i] ?? 0
             minuteToCountMap[i] = count + 1
         }
     }
+    
     let mostSleepMinuteForGuard = minuteToCountMap.max { (a, b) -> Bool in
         return a.value < b.value
     }!
