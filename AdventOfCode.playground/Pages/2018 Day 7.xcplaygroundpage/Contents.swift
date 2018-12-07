@@ -5,8 +5,14 @@ import Foundation
 // Day 7
 
 // *** Shared ***
+extension String {
+    var alphabetPosition: Int {
+        return Int(UnicodeScalar(self)?.value ?? UInt32(0)) - 64
+    }
+}
+
 struct SleighKit {
-    /// This contains map of all verticies to the verticies
+    /// This contains map of all vertices to the vertices
     /// which are connected
     /// C: A,F
     /// D: E
@@ -14,26 +20,26 @@ struct SleighKit {
     /// F: E
     /// B: E
     private let adjacencyList: [String: Set<String>]
-    private let allVerticies: Set<String>
+    private let allVertices: Set<String>
     
-    typealias Dependency = (dependency: String, dependent: String)
+    typealias Dependency = (from: String, to: String)
     
     init(filename: String) {
         let dependencies = SleighKit.depedenciesFromFilename(filename)
         
-        var tempAllVerticies = Set<String>()
+        var tempAllVertices = Set<String>()
         var tempAdjacencyList = [String: Set<String>]()
         for dependency in dependencies {
-            tempAdjacencyList[dependency.dependency,
-                              default: Set<String>()].insert(dependency.dependent)
-            tempAllVerticies.insert(dependency.dependency)
-            tempAllVerticies.insert(dependency.dependent)
+            tempAdjacencyList[dependency.to,
+                              default: Set<String>()].insert(dependency.from)
+            tempAllVertices.insert(dependency.from)
+            tempAllVertices.insert(dependency.to)
         }
         adjacencyList = tempAdjacencyList
         adjacencyList
         
-        allVerticies = tempAllVerticies
-        allVerticies
+        allVertices = tempAllVertices
+        allVertices
     }
     
     private static func linesFromFilename(_ filename: String) -> [String] {
@@ -54,38 +60,21 @@ struct SleighKit {
     }
     
     func getOrderOfSteps() -> String {
+        var tempAdjacencyList = adjacencyList
+        var availableVertices = getInitiallyAvailableVertices()
+
         var order = [String]()
-        
-        let verticiesWithNoDependencies = allVerticies.filter { (vertex) -> Bool in
-            var isInList = false
-            for set in adjacencyList.values {
-                if set.contains(vertex) {
-                    isInList = true
-                }
-            }
-            return !isInList
-        }
-        
-        var availableVertices = verticiesWithNoDependencies
-        var currentVertex: String!
-        while order.count != allVerticies.count {
-            print("Available vertices:\(availableVertices)")
-            currentVertex = Array(availableVertices).sorted { $0 < $1 }.first!
-            print("Chose \(currentVertex)")
-            
+        while let currentVertex = availableVertices.popLast() {
+            print("Chose \(String(describing: currentVertex))")
             order.append(currentVertex)
-            availableVertices.remove(currentVertex)
             
-            if let set = adjacencyList[currentVertex] {
-                for vertex in set {
-                    // Only insert if all dependencies have completed
-                    let dependencies = getDependenciesOfVertex(vertex)
-                    let dependenciesUncompleted = dependencies.filter { !order.contains($0) }.count
-                    if dependenciesUncompleted == 0 {
-                        availableVertices.insert(vertex)
-                    }
-                }
-            }
+            let adjustments = getAdjustmentsAfterReachingVertex(currentVertex,
+                                                                adjList: tempAdjacencyList,
+                                                                availableVertices: availableVertices)
+            tempAdjacencyList = adjustments.adjacencyList
+            availableVertices = adjustments.availableVertices
+            
+            print("Available vertices:\(availableVertices)")
         }
 
         var orderString = ""
@@ -93,6 +82,83 @@ struct SleighKit {
             orderString.append(vertex)
         }
         return orderString
+    }
+    
+    struct Worker {
+        var timeRemainingOnCurrentTask: Int = 0
+        var currentVertex: String? = nil
+        
+        var isWorking: Bool {
+            return currentVertex != nil
+        }
+        
+        var shouldFinishTask: Bool {
+            return timeRemainingOnCurrentTask <= 0 && isWorking
+        }
+    }
+    
+    func totalTimeToCompleteSteps(numOfWorkers: Int, timeToAddForEachStep: Int) -> Int {
+        var tempAdjacencyList = adjacencyList
+        var availableVertices = getInitiallyAvailableVertices()
+        var workers = Array.init(repeating: Worker(), count: numOfWorkers)
+        
+        var time = 0
+        var workersWithTimeRemaining = workers
+        while !workersWithTimeRemaining.isEmpty {
+            // Update workers as time elapses
+            for (index, _) in workers.enumerated() {
+                workers[index].timeRemainingOnCurrentTask -= 1
+            }
+            
+            // Check if workers are able to finish task
+            // at this point in time, if so update
+            // data structures for next node
+            for (index, _) in workers.enumerated() {
+                if workers[index].shouldFinishTask {
+                    let adjustments = getAdjustmentsAfterReachingVertex(workers[index].currentVertex!, adjList: tempAdjacencyList, availableVertices: availableVertices)
+                    tempAdjacencyList = adjustments.adjacencyList
+                    availableVertices = adjustments.availableVertices
+                    workers[index].currentVertex = nil
+                }
+            }
+            
+            // If workers can take on another task, assign them
+            for (index, worker) in workers.enumerated() {
+                if worker.timeRemainingOnCurrentTask <= 0,
+                    let currentVertex = availableVertices.popLast() {
+                    let time = currentVertex.alphabetPosition + timeToAddForEachStep
+                    workers[index] = Worker(timeRemainingOnCurrentTask: time,
+                                            currentVertex: currentVertex)
+                }
+            }
+            
+            // If any of the workers have time remaining,
+            // we should keep going, otherwise stop
+            workersWithTimeRemaining = workers.filter { $0.timeRemainingOnCurrentTask > 0 }
+            time += 1
+        }
+        return time - 1
+    }
+    
+    private func getAdjustmentsAfterReachingVertex(_ vertex: String, adjList: [String: Set<String>], availableVertices: [String])
+        -> (adjacencyList: [String: Set<String>], availableVertices: [String]) {
+        var tempAdjacencyList = adjList
+        var tempAvailableVertices = availableVertices
+        for to in tempAdjacencyList.keys {
+            tempAdjacencyList[to]!.remove(vertex)
+            if tempAdjacencyList[to]!.isEmpty {
+                tempAdjacencyList[to] = nil
+                tempAvailableVertices.append(to)
+            }
+        }
+        tempAvailableVertices.sort { $0 > $1 }
+        return (tempAdjacencyList, tempAvailableVertices)
+    }
+    
+    private func getInitiallyAvailableVertices() -> [String] {
+        return allVertices.filter {
+            !adjacencyList.keys.contains($0)
+        }.sorted { $0 > $1 }
     }
     
     private func getDependenciesOfVertex(_ vertex: String) -> [String] {
@@ -105,8 +171,7 @@ struct SleighKit {
 }
 
 let sleighKit = SleighKit(filename: "input")
-print(sleighKit.getOrderOfSteps())
-
-
-
+//print(sleighKit.getOrderOfSteps())
+print(sleighKit.totalTimeToCompleteSteps(numOfWorkers: 5, timeToAddForEachStep: 60))
+// 253 is too low
 //: [Next](@next)
