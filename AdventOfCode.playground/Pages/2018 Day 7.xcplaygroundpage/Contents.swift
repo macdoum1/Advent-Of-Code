@@ -43,9 +43,7 @@ struct SleighKit {
     }
     
     private static func linesFromFilename(_ filename: String) -> [String] {
-        filename
         let fileURL = Bundle.main.url(forResource: filename, withExtension: "txt")
-        fileURL
         let string = (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
         return string.split(separator: "\n").map { String($0) }
     }
