@@ -21,7 +21,7 @@ position=< 43544,  54288> velocity=<-4, -5>
 position=< 43528, -21531> velocity=<-4,  2>
 position=<-10651,  43463> velocity=< 1, -4>
 position=<-53930,  54294> velocity=< 5, -5>
-position=< 21882, -43187> velocity=<-2,  4>
+position=< 21882, -43187> velocity=<-2,  4>>
 position=< 32665,  43460> velocity=<-3, -4>
 position=<-10646, -43191> velocity=< 1,  4>
 position=< 32709, -21528> velocity=<-3,  2>

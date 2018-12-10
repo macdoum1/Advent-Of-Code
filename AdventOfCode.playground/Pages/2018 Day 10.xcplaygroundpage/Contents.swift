@@ -10,12 +10,22 @@ func linesFromFilename(_ filename: String) -> [String] {
 }
 
 struct Sky {
-    private let points: [Point]
+    let points: [Point]
+    
     struct Point: Hashable {
         let positionX: Int
         let positionY: Int
         let velocityX: Int
         let velocityY: Int
+        
+        var position: CGPoint {
+            return CGPoint(x: positionX, y: positionY)
+        }
+        
+        var velocity: CGPoint {
+            return CGPoint(x: velocityX, y: velocityY)
+        }
+        
         init(line: String) {
             var santizedString = line.replacingOccurrences(of: " ", with: "")
             santizedString = santizedString.replacingOccurrences(of: "position=", with: "")
@@ -60,20 +70,46 @@ struct Sky {
         return string.split(separator: "\n").map { String($0) }
     }
     
-    func stringAfterTime(_ time: Int) -> String {
-        let newPoints = points.map { (point) -> Point in
-            let newX = point.positionX + (point.velocityX * time)
-            let newY = point.positionY + (point.velocityY * time)
-            return Point(positionX: newX, positionY: newY)
+    func toString() -> String {
+        
+        var minArea = Int.max
+        var minPoints: [Point] = []
+        var timeToSpell = 0
+        
+        for time in 0...30000 {
+            let newPoints = points.map { (point) -> Point in
+                let newX = point.positionX + (point.velocityX * time)
+                let newY = point.positionY + (point.velocityY * time)
+                return Point(positionX: newX, positionY: newY)
+            }
+            
+            let valuesX = newPoints.map { $0.positionX }
+            let valuesY = newPoints.map { $0.positionY }
+            
+            let minX = valuesX.min()!
+            let maxX = valuesX.max()!
+            let minY = valuesY.min()!
+            let maxY = valuesY.max()!
+            
+            let xRange = maxX - minX
+            let yRange = maxY - minY
+            let area = xRange * yRange
+            if area < minArea {
+                minArea = area
+                minPoints = newPoints
+                timeToSpell = time
+            }
+        }
+        print(timeToSpell)
+        print("Found min")
+        
+        var set = Set<Point>()
+        for point in minPoints {
+            set.insert(point)
         }
         
-        var pointSet = Set<Point>()
-        for newPoint in newPoints {
-            pointSet.insert(newPoint)
-        }
-        
-        let valuesX = points.map { $0.positionX }
-        let valuesY = points.map { $0.positionY }
+        let valuesX = minPoints.map { $0.positionX }
+        let valuesY = minPoints.map { $0.positionY }
         
         let minX = valuesX.min()!
         let maxX = valuesX.max()!
@@ -81,34 +117,74 @@ struct Sky {
         let maxY = valuesY.max()!
         
         var string = ""
-        for y in minY..<maxY {
-            for x in minX..<maxX {
-                let point = Point(positionX: x, positionY: y)
-                let contains = pointSet.contains(point)
-                
-                if contains {
+        for y in minY...maxY {
+            for x in minX...maxX {
+                if set.contains(Point(positionX: x, positionY: y)) {
                     string.append("#")
                 } else {
                     string.append(" ")
                 }
             }
             string.append("\n")
+            print("\(y) in \(minY)-\(maxY)")
         }
+        
         return string
+    }
+    
+    
+
+    
+    private func scaleBetween(unscaledNum: CGFloat,
+                              minAllowed: CGFloat,
+                              maxAllowed: CGFloat,
+                              min: CGFloat,
+                              max: CGFloat) -> CGFloat {
+        return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed
     }
 }
 
-print("Enter input path")
-let urlString = readLine()
-print(urlString!)
-let url = URL(fileURLWithPath: urlString!)
-let sky = Sky(url: url)
 
-var time = 0
-while readLine() != nil {
-    print("Time \(time)")
-    let string = sky.stringAfterTime(time)
-    print(string)
-    time += 1
-}
-////: [Next](@next)
+
+//import UIKit
+//import SceneKit
+//import QuartzCore
+//import PlaygroundSupport
+//
+//var sceneView = SCNView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+//var scene = SCNScene()
+//sceneView.scene = scene
+//PlaygroundPage.current.liveView = sceneView
+//
+//sceneView.autoenablesDefaultLighting = true
+//
+//var cameraNode = SCNNode()
+//cameraNode.camera = SCNCamera()
+//cameraNode.position = SCNVector3(x: 0, y: 0, z: 100)
+//scene.rootNode.addChildNode(cameraNode)
+//scene.physicsWorld.timeStep = 10
+//
+//func getNode(position: CGPoint, velocity: CGPoint) -> SCNNode {
+//    position
+//    velocity
+//    let sphere = SCNSphere(radius: 2)
+//    sphere.firstMaterial?.diffuse.contents  = UIColor.red
+//    sphere.firstMaterial?.specular.contents = UIColor.white
+//    let node = SCNNode(geometry: sphere)
+//    node.position = SCNVector3(position.x, position.y, 0)
+//
+//    let physics = SCNPhysicsBody(type: .dynamic, shape:SCNPhysicsShape(geometry: SCNSphere(radius: 2), options:nil))
+//    physics.friction = 0
+//    physics.isAffectedByGravity = false
+//    physics.velocity = SCNVector3(velocity.x, velocity.y, 0)
+//    node.physicsBody = physics
+//    node.physicsBody?.restitution = 1
+//    return node
+//}
+//
+//let sky = Sky(filename: "test-input")
+//for point in sky.points {
+//    let node = getNode(position: point.position, velocity: point.velocity)
+//    scene.rootNode.addChildNode(node)
+//}
+
