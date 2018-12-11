@@ -1,6 +1,7 @@
 //: [Previous](@previous)
 
 import Foundation
+import UIKit
 
 // Day 10
 func linesFromFilename(_ filename: String) -> [String] {
