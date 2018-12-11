@@ -147,45 +147,45 @@ struct Sky {
 
 
 
-//import UIKit
-//import SceneKit
-//import QuartzCore
-//import PlaygroundSupport
-//
-//var sceneView = SCNView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
-//var scene = SCNScene()
-//sceneView.scene = scene
-//PlaygroundPage.current.liveView = sceneView
-//
-//sceneView.autoenablesDefaultLighting = true
-//
-//var cameraNode = SCNNode()
-//cameraNode.camera = SCNCamera()
-//cameraNode.position = SCNVector3(x: 0, y: 0, z: 100)
-//scene.rootNode.addChildNode(cameraNode)
-//scene.physicsWorld.timeStep = 10
-//
-//func getNode(position: CGPoint, velocity: CGPoint) -> SCNNode {
-//    position
-//    velocity
-//    let sphere = SCNSphere(radius: 2)
-//    sphere.firstMaterial?.diffuse.contents  = UIColor.red
-//    sphere.firstMaterial?.specular.contents = UIColor.white
-//    let node = SCNNode(geometry: sphere)
-//    node.position = SCNVector3(position.x, position.y, 0)
-//
-//    let physics = SCNPhysicsBody(type: .dynamic, shape:SCNPhysicsShape(geometry: SCNSphere(radius: 2), options:nil))
-//    physics.friction = 0
-//    physics.isAffectedByGravity = false
-//    physics.velocity = SCNVector3(velocity.x, velocity.y, 0)
-//    node.physicsBody = physics
-//    node.physicsBody?.restitution = 1
-//    return node
-//}
-//
-//let sky = Sky(filename: "test-input")
-//for point in sky.points {
-//    let node = getNode(position: point.position, velocity: point.velocity)
-//    scene.rootNode.addChildNode(node)
-//}
+import UIKit
+import SceneKit
+import QuartzCore
+import PlaygroundSupport
+
+var sceneView = SCNView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+var scene = SCNScene()
+sceneView.scene = scene
+PlaygroundPage.current.liveView = sceneView
+
+sceneView.autoenablesDefaultLighting = true
+
+var cameraNode = SCNNode()
+cameraNode.camera = SCNCamera()
+cameraNode.position = SCNVector3(x: 0, y: 0, z: 100)
+scene.rootNode.addChildNode(cameraNode)
+scene.physicsWorld.timeStep = 10
+
+func getNode(position: CGPoint, velocity: CGPoint) -> SCNNode {
+    position
+    velocity
+    let sphere = SCNSphere(radius: 2)
+    sphere.firstMaterial?.diffuse.contents  = UIColor.red
+    sphere.firstMaterial?.specular.contents = UIColor.white
+    let node = SCNNode(geometry: sphere)
+    node.position = SCNVector3(position.x, position.y, 0)
+
+    let physics = SCNPhysicsBody(type: .dynamic, shape:SCNPhysicsShape(geometry: SCNSphere(radius: 2), options:nil))
+    physics.friction = 0
+    physics.isAffectedByGravity = false
+    physics.velocity = SCNVector3(velocity.x, velocity.y, 0)
+    node.physicsBody = physics
+    node.physicsBody?.restitution = 1
+    return node
+}
+
+let sky = Sky(filename: "input")
+for point in sky.points {
+    let node = getNode(position: point.position, velocity: point.velocity)
+    scene.rootNode.addChildNode(node)
+}
 
