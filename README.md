@@ -22,3 +22,5 @@
 
 [2018 Day 11](http://github.com/macdoum1/Advent-Of-Code/blob/master/AdventOfCode.playground/Pages/2018%20Day%2011.xcplaygroundpage/Contents.swift)
 
+[2018 Day 12](http://github.com/macdoum1/Advent-Of-Code/blob/master/AdventOfCode.playground/Pages/2018%20Day%2012.xcplaygroundpage/Contents.swift)
+
