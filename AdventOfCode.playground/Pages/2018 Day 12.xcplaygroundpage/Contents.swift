@@ -65,6 +65,17 @@ extension Collection {
 }
 
 struct Tunnel {
+    class Node {
+        var previous: Node?
+        var next: Node?
+        let containsPlant: Bool
+        init(containsPlant: Bool, previous: Node?=nil, next: Node?=nil) {
+            self.containsPlant = containsPlant
+            self.previous = previous
+            self.next = next
+        }
+    }
+    
     struct Rule {
         /// Always 5 long
         let sequence: [Bool]
@@ -101,6 +112,7 @@ struct Tunnel {
     func stateAfterGeneration(_ generation: Int) -> [Bool] {
         var lastState = initialState
         
+        var lastSum = 0
         for i in 0..<generation {
             lastState.insert(contentsOf: Array(repeating: false, count: Tunnel.padding), at: 0)
             lastState.append(contentsOf: Array(repeating: false, count: Tunnel.padding))
@@ -128,7 +140,10 @@ struct Tunnel {
             // Assign new state
             lastState = newState
             
-            print(i)
+            let sum = Tunnel.getSumOfPotIndices(state: lastState, generation: i+1)
+            print("Diff: \(sum - lastSum)")
+            lastSum = sum
+            print("Sum: \(sum) at generation \(i+1)")
         }
         
         return lastState
@@ -155,14 +170,46 @@ struct Tunnel {
     
 }
 
+//let tunnel = Tunnel(string: input)
+//print(Tunnel.stateToString(tunnel.initialState))
+
+//
+//print(Tunnel.stateToString(state))
+
+
+// The slope of the line at some point is 32
+// using an existing point we can determine the sum
+// at a distant generation
+// Example output at high generations:
+/*
+ Sum: 111505 at generation 3471
+ Diff: 32
+ Sum: 111537 at generation 3472
+ Diff: 32
+ Sum: 111569 at generation 3473
+ Diff: 32
+ Sum: 111601 at generation 3474
+ Diff: 32
+ Sum: 111633 at generation 3475
+ Diff: 32
+ Sum: 111665 at generation 3476
+ Diff: 32
+ Sum: 111697 at generation 3477
+ Diff: 32
+ Sum: 111729 at generation 3478
+ */
+let generation = 50000000000
+let result = (generation - 644) * 32 + 21009
+print(result)
+
 let tunnel = Tunnel(string: input)
-print(Tunnel.stateToString(tunnel.initialState))
+let state = tunnel.stateAfterGeneration(generation)
+print(Tunnel.getSumOfPotIndices(state: state, generation: generation))
 
 
-let generation = 20
-let stateAfter20 = tunnel.stateAfterGeneration(generation)
-print(Tunnel.stateToString(stateAfter20))
-print(Tunnel.getSumOfPotIndices(state: stateAfter20, generation: generation))
-
+// 1600000000401
+// 1599999975919 too low
+// 1600000000433 too high
+// 1600000000465 too high
 
 //: [Next](@next)
