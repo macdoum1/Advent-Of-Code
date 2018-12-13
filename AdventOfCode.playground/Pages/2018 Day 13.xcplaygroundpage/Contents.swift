@@ -38,19 +38,12 @@ struct System {
             }
         }
         
-        enum Direction {
-            case up
-            case down
-            case left
-            case right
+        enum Direction: Character {
+            case up = "^"
+            case down = "v"
+            case left = "<"
+            case right = ">"
         }
-        
-        private let map: [Character: Direction] = [
-            "^": .up,
-            "v": .down,
-            "<": .left,
-            ">": .right,
-        ]
         
         var isHorizontal: Bool {
             return direction == .left || direction == .right
@@ -62,15 +55,14 @@ struct System {
         private var lastIntersectionDecision = IntersectionDecision.right
         
         init?(character: Character, identifier: Int=0) {
-            guard let direction = map[character] else { return nil }
+            guard let direction = Direction(rawValue: character) else { return nil }
             self.direction = direction
             
             self.identifier = identifier
         }
         
         var characterDescription: Character {
-            let inverseMap = map.swapKeyValues()
-            return inverseMap[direction]!
+            return direction.rawValue
         }
         
         private func shouldStayCourse(trackType: Track.TrackType) -> Bool {
@@ -159,23 +151,15 @@ struct System {
     }
     
     struct Track: MapPiece {
-        enum TrackType {
-            case horizontal
-            case vertical
-            case forwardCurve
-            case backwardCurve
-            case intersection
+        enum TrackType: Character {
+            case horizontal = "-"
+            case vertical = "|"
+            case forwardCurve = "+"
+            case backwardCurve = "/"
+            case intersection = "\\"
         }
         
         var train: Train?
-        
-        private let map: [Character: TrackType] = [
-            "-": .horizontal,
-            "|": .vertical,
-            "+": .intersection,
-            "/": .forwardCurve,
-            "\\": .backwardCurve,
-        ]
         
         let type: TrackType
         
@@ -189,7 +173,7 @@ struct System {
             if let train = Train(character: character) {
                 self.train = train
                 self.type = train.isHorizontal ? .horizontal : .vertical
-            } else if let type = map[character] {
+            } else if let type = TrackType(rawValue: character) {
                 self.type = type
             } else {
                 return nil
@@ -200,8 +184,7 @@ struct System {
             if let train = train {
                 return train.characterDescription
             } else {
-                let inverseMap = map.swapKeyValues()
-                return inverseMap[type]!
+                return type.rawValue
             }
         }
     }
@@ -219,23 +202,36 @@ struct System {
         return (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
     }
     
-    init(filename: String) {
-        let input = System.inputFromFilename(filename)
-        let lines = input.split(separator: "\n")
-        
+    private static func inputFromURL(_ fileUrl: URL) -> String {
+        return (try? String(contentsOf: fileUrl, encoding: .utf8)) ?? ""
+    }
+    
+    private init(lines: [String]) {
         let xLength = lines.map { $0.count }.max() ?? 0
         map = lines.map {
             let row = Array($0)
             return (0..<xLength).map({ (x) -> MapPiece in
                 if let character = row[safe: x],
                     let track = Track(character: character) {
-                    // TODO store train for ticking better
                     return track
                 } else {
                     return Empty()
                 }
             })
         }
+        map
+    }
+    
+    init(filename: String) {
+        let input = System.inputFromFilename(filename)
+        let lines = input.split(separator: "\n").map { String($0) }
+        self.init(lines: lines)
+    }
+    
+    init(fileUrl: URL) {
+        let input = System.inputFromURL(fileUrl)
+        let lines = input.split(separator: "\n").map { String($0) }
+        self.init(lines: lines)
     }
     
     /// Moves time forward 1 tick
@@ -264,16 +260,13 @@ struct System {
                 }
                 
                 if nextTrack.train != nil {
+                    nextTrack.train = nil
                     collisionPosition = nextPosition
-                    break
                 } else {
                     nextTrack.train = train
-                    map[nextPosition.y][nextPosition.x] = nextTrack
                 }
-            }
-            
-            if collisionPosition != nil {
-                break
+                
+                map[nextPosition.y][nextPosition.x] = nextTrack
             }
         }
         return collisionPosition
@@ -284,9 +277,14 @@ struct System {
             String($0.map { $0.characterDescription })
         }.joined(separator: "\n")
         print(desc)
+        
+        map.forEach {
+            print($0.count)
+        }
     }
     
     func printPositionOfFirstCollision() {
+        var system = self
         var collisionPosition: Position? = nil
         while collisionPosition == nil {
 //            system.printState()
@@ -296,13 +294,58 @@ struct System {
         print("\(collisionPosition?.x ?? -1),\(collisionPosition?.y ?? -1)")
     }
     
+    func countTrains() -> Int {
+        return map.flatMap {
+            $0.filter {
+                guard let track = $0 as? Track else { return false }
+                return track.train != nil
+            }
+        }.count
+    }
     
+    func printPositionOfLastRemainingCart() {
+        var system = self
+        var count = system.countTrains()
+        while count > 1 {
+            // Update the count if a collision occurs
+            if system.tick() != nil {
+                count = system.countTrains()
+            }
+        }
+        
+        for (y, row) in system.map.enumerated() {
+            for (x, piece) in row.enumerated() {
+                guard let track = piece as? Track else { continue }
+                guard track.train != nil else { continue }
+                
+                print("Position of last cart: \(x),\(y)")
+                
+                break
+            }
+        }
+    }
 }
 
-var system = System(filename: "input")
-system.printPositionOfFirstCollision()
+// Part 1
+//let system = System(filename: "input")
+//system.printPositionOfFirstCollision()
 
+// Part 2
 
+//print("Enter filename")
+//let input = readLine() ?? ""
+//print(input)
+//let url = URL(fileURLWithPath: input)!
+//print("Url generated")
+//
+
+//let system = System(fileUrl: url)
+var system = System(filename: "test-input")
+system.printState()
+system.tick()
+system.printState()
+//system.printPositionOfLastRemainingCart()
+// Not 97,107
 
 
 //: [Next](@next)
