@@ -19,9 +19,25 @@ extension Dictionary where Value : Hashable {
     }
 }
 
+extension Collection {
+    subscript (safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
 struct System {
-//    private static let intersectionRule: [Train.Direction] = [.left, .straight, .right]
+    typealias Position = (x: Int, y: Int)
     struct Train: MapPiece {
+        enum IntersectionDecision: Int {
+            case left
+            case straight
+            case right
+            
+            func next() -> IntersectionDecision {
+                return IntersectionDecision(rawValue: rawValue + 1) ?? IntersectionDecision(rawValue: 0)!
+            }
+        }
+        
         enum Direction {
             case up
             case down
@@ -43,6 +59,8 @@ struct System {
         var direction: Direction
         let identifier: Int
         
+        private var lastIntersectionDecision = IntersectionDecision.right
+        
         init?(character: Character, identifier: Int=0) {
             guard let direction = map[character] else { return nil }
             self.direction = direction
@@ -55,32 +73,87 @@ struct System {
             return inverseMap[direction]!
         }
         
-        func shouldStayCourse(trackType: Track.TrackType) -> Bool {
+        private func shouldStayCourse(trackType: Track.TrackType) -> Bool {
             return (trackType == .horizontal && direction == .left) ||
                 (trackType == .horizontal && direction == .right) ||
                 (trackType == .vertical && direction == .up) ||
                 (trackType == .vertical && direction == .down)
         }
         
-        typealias Position = (x: Int, y: Int)
-        
-        func getNextPosition(current: Position, trackType: Track.TrackType) -> Position {
+        mutating func turnIfNecessary(trackType: Track.TrackType) {
             if shouldStayCourse(trackType: trackType) {
+                return
+            }
+            
+            switch trackType {
+                
+                // These are not right
+            case .backwardCurve:
                 switch direction {
                 case .up:
-                    return (current.x, current.y-1)
+                    direction = .left
                 case .down:
-                    return (current.x, current.y+1)
+                    direction = .right
                 case .left:
-                    return (current.x-1, current.y)
+                    direction = .up
                 case .right:
-                    return (current.x+1, current.y)
+                    direction = .down
                 }
-            } else {
-                // TODO handle turning
-                // TODO handle curves?
-                print("should turn")
-                return (-1, -1)
+            case .forwardCurve:
+                switch direction {
+                case .up:
+                    direction = .right
+                case .down:
+                    direction = .left
+                case .left:
+                    direction = .down
+                case .right:
+                    direction = .up
+                }
+            case .intersection:
+                let decision = lastIntersectionDecision.next()
+                lastIntersectionDecision = decision
+                switch decision {
+                case .left:
+                    switch direction {
+                    case .up:
+                        direction = .left
+                    case .down:
+                        direction = .right
+                    case .left:
+                        direction = .down
+                    case .right:
+                        direction = .up
+                    }
+                case .straight:
+                    break
+                case .right:
+                    switch direction {
+                    case .up:
+                        direction = .right
+                    case .down:
+                        direction = .left
+                    case .left:
+                        direction = .up
+                    case .right:
+                        direction = .down
+                    }
+                }
+            default:
+                fatalError("This shouldn't happen")
+            }
+        }
+        
+        func getNextPosition(current: Position) -> Position {
+            switch direction {
+            case .up:
+                return (current.x, current.y-1)
+            case .down:
+                return (current.x, current.y+1)
+            case .left:
+                return (current.x-1, current.y)
+            case .right:
+                return (current.x+1, current.y)
             }
         }
     }
@@ -139,15 +212,23 @@ struct System {
         }
     }
     
-    private let map: [[MapPiece]]
+    private var map: [[MapPiece]]
+    
+    private static func inputFromFilename(_ filename: String) -> String {
+        let fileURL = Bundle.main.url(forResource: filename, withExtension: "txt")
+        return (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
+    }
     
     init(filename: String) {
         let input = System.inputFromFilename(filename)
         let lines = input.split(separator: "\n")
         
-        map = lines.map { (line) -> [MapPiece] in
-            return line.map({ (character) -> MapPiece in
-                if let track = Track(character: character) {
+        let xLength = lines.map { $0.count }.max() ?? 0
+        map = lines.map {
+            let row = Array($0)
+            return (0..<xLength).map({ (x) -> MapPiece in
+                if let character = row[safe: x],
+                    let track = Track(character: character) {
                     // TODO store train for ticking better
                     return track
                 } else {
@@ -157,44 +238,71 @@ struct System {
         }
     }
     
-    func tick() {
+    /// Moves time forward 1 tick
+    ///
+    /// - Returns: Position of collision
+    mutating func tick() -> Position? {
+        var collisionPosition: Position? = nil
         for (y, row) in map.enumerated() {
-            print("row: \(row.count)")
             for (x, piece) in row.enumerated() {
                 guard var track = piece as? Track else { continue }
-                guard let train = track.train else { continue }
+                guard var train = track.train else { continue }
                 
-                let nextPosition = train.getNextPosition(current: (x, y), trackType: track.type)
-                print(nextPosition)
+                train.turnIfNecessary(trackType: track.type)
+                
+                // Get next position based on current direction
+                let nextPosition = train.getNextPosition(current: (x, y))
+                
+                // Move train from old track
                 track.train = nil
-                guard var nextTrack = map[nextPosition.x][nextPosition.y] as? Track else {
+                map[y][x] = track
+                
+                // Add train to new track while checking for collisions
+                guard var nextTrack = map[nextPosition.y][nextPosition.x] as? Track else {
                     fatalError("You dun goofed")
                     continue
                 }
                 
-                nextTrack.train = train
+                if nextTrack.train != nil {
+                    collisionPosition = nextPosition
+                    break
+                } else {
+                    nextTrack.train = train
+                    map[nextPosition.y][nextPosition.x] = nextTrack
+                }
+            }
+            
+            if collisionPosition != nil {
+                break
             }
         }
+        return collisionPosition
     }
     
     func printState() {
         let desc = map.map {
             String($0.map { $0.characterDescription })
         }.joined(separator: "\n")
-        
         print(desc)
     }
     
-    private static func inputFromFilename(_ filename: String) -> String {
-        let fileURL = Bundle.main.url(forResource: filename, withExtension: "txt")
-        return (try? String(contentsOf: fileURL!, encoding: .utf8)) ?? ""
+    func printPositionOfFirstCollision() {
+        var collisionPosition: Position? = nil
+        while collisionPosition == nil {
+//            system.printState()
+            collisionPosition = system.tick()
+        }
+        
+        print("\(collisionPosition?.x ?? -1),\(collisionPosition?.y ?? -1)")
     }
+    
+    
 }
 
-let system = System(filename: "test-input")
-system.printState()
-system.tick()
-system.printState()
+var system = System(filename: "input")
+system.printPositionOfFirstCollision()
+
+
 
 
 //: [Next](@next)
