@@ -9,6 +9,8 @@ struct RecipeBoard {
     private var elf1Index = 0
     private var elf2Index = 1
     
+    var sumToIntegerCache = [Int: [Int]]()
+    
     init(initialScores: [Int]) {
         recipeScores = initialScores
     }
@@ -26,8 +28,10 @@ struct RecipeBoard {
     
     private mutating func addRecipeFromScores(_ score1: Int, _ score2: Int) {
         let sum = score1 + score2
-        let integerArray = "\(sum)".compactMap{ Int(String($0)) }
-        recipeScores.append(contentsOf: integerArray)
+        if sum >= 10 {
+            recipeScores.append(sum / 10 % 10)
+        }
+        recipeScores.append(sum % 10)
     }
     
     func printState() {
@@ -39,18 +43,43 @@ struct RecipeBoard {
     mutating func printTenRecipesAfterNRecipes(_ n: Int) {
         while recipeScores.count < n + 10 {
             generateNewRecipes()
-//            printState()
         }
-        
-        
         
         let string = recipeScores[n..<n+10].map { String($0) }.joined()
         print(string)
     }
+    
+    mutating func printHowManyRecipesBefore(target: Int) {
+        var count = 0
+        let targetIntArray = "\(target)".map { return Int(String($0))! }
+        while isTargetPresentNearEndOfRecipeList(target: targetIntArray)  {
+            generateNewRecipes()
+            count = recipeScores.count - targetIntArray.count
+            print(count)
+        }
+        
+        if Array(recipeScores.suffix(targetIntArray.count)) == targetIntArray {
+            print(count)
+        } else {
+            print(count - 1)
+        }
+    }
+    
+    // Since we can add to to two integers at once, we need to check
+    // both states
+    private func isTargetPresentNearEndOfRecipeList(target: [Int]) -> Bool {
+        return Array(recipeScores.suffix(target.count)) != target &&
+            Array(recipeScores.dropLast().suffix(target.count)) != target
+    }
 }
 
+// Part 1
 var recipeBoard = RecipeBoard(initialScores: [3, 7])
-recipeBoard.printTenRecipesAfterNRecipes(147061)
-
-// Not 1455811313
+////recipeBoard.printTenRecipesAfterNRecipes(2018)
+//
+//// Part 2
+recipeBoard.printHowManyRecipesBefore(target: 147061)
+// Not 71764232 too high
+// Not 71764231 too high
+//     20283721
 //: [Next](@next)
