@@ -26,3 +26,5 @@
 
 [2018 Day 13](http://github.com/macdoum1/Advent-Of-Code/blob/master/AdventOfCode.playground/Pages/2018%20Day%2013.xcplaygroundpage/Contents.swift)
 
+[2018 Day 14](http://github.com/macdoum1/Advent-Of-Code/blob/master/AdventOfCode.playground/Pages/2018%20Day%2014.xcplaygroundpage/Contents.swift)
+
