@@ -7,18 +7,6 @@ protocol MapPiece {
     var characterDescription: Character { get }
 }
 
-// From https://stackoverflow.com/a/50007091
-extension Dictionary where Value : Hashable {
-    func swapKeyValues() -> [Value : Key] {
-        assert(Set(self.values).count == self.keys.count, "Values must be unique")
-        var newDict = [Value : Key]()
-        for (key, value) in self {
-            newDict[value] = key
-        }
-        return newDict
-    }
-}
-
 extension Collection {
     subscript (safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
@@ -50,36 +38,21 @@ struct System {
         }
         
         var direction: Direction
-        let identifier: Int
+        var currentTick = 0
         
         private var lastIntersectionDecision = IntersectionDecision.right
         
-        init?(character: Character, identifier: Int=0) {
+        init?(character: Character) {
             guard let direction = Direction(rawValue: character) else { return nil }
             self.direction = direction
-            
-            self.identifier = identifier
         }
         
         var characterDescription: Character {
             return direction.rawValue
         }
-        
-        private func shouldStayCourse(trackType: Track.TrackType) -> Bool {
-            return (trackType == .horizontal && direction == .left) ||
-                (trackType == .horizontal && direction == .right) ||
-                (trackType == .vertical && direction == .up) ||
-                (trackType == .vertical && direction == .down)
-        }
-        
+
         mutating func turnIfNecessary(trackType: Track.TrackType) {
-            if shouldStayCourse(trackType: trackType) {
-                return
-            }
-            
             switch trackType {
-                
-                // These are not right
             case .backwardCurve:
                 switch direction {
                 case .up:
@@ -131,8 +104,20 @@ struct System {
                         direction = .down
                     }
                 }
-            default:
-                fatalError("This shouldn't happen")
+            case .vertical:
+                switch direction {
+                case .up, .down:
+                    break
+                case .left, .right:
+                    fatalError("Never go left or right on vertical track")
+                }
+            case .horizontal:
+                switch direction {
+                case .up, .down:
+                    fatalError("Never go up or down on horizontal track")
+                case .left, .right:
+                    break
+                }
             }
         }
         
@@ -154,9 +139,9 @@ struct System {
         enum TrackType: Character {
             case horizontal = "-"
             case vertical = "|"
-            case forwardCurve = "+"
-            case backwardCurve = "/"
-            case intersection = "\\"
+            case forwardCurve = "/"
+            case backwardCurve = "\\"
+            case intersection = "+"
         }
         
         var train: Train?
@@ -219,7 +204,6 @@ struct System {
                 }
             })
         }
-        map
     }
     
     init(filename: String) {
@@ -237,17 +221,25 @@ struct System {
     /// Moves time forward 1 tick
     ///
     /// - Returns: Position of collision
+    var currentTick: Int = 0
     mutating func tick() -> Position? {
         var collisionPosition: Position? = nil
-        for (y, row) in map.enumerated() {
-            for (x, piece) in row.enumerated() {
+        
+        for y in 0..<map.count {
+            for x in 0..<map[y].count {
+                let piece = map[y][x]
                 guard var track = piece as? Track else { continue }
                 guard var train = track.train else { continue }
+                guard train.currentTick == currentTick else {
+                    continue
+                }
                 
                 train.turnIfNecessary(trackType: track.type)
                 
                 // Get next position based on current direction
                 let nextPosition = train.getNextPosition(current: (x, y))
+                
+                train.currentTick += 1
                 
                 // Move train from old track
                 track.train = nil
@@ -269,6 +261,8 @@ struct System {
                 map[nextPosition.y][nextPosition.x] = nextTrack
             }
         }
+        
+        currentTick += 1
         return collisionPosition
     }
     
@@ -276,18 +270,13 @@ struct System {
         let desc = map.map {
             String($0.map { $0.characterDescription })
         }.joined(separator: "\n")
-        print(desc)
-        
-        map.forEach {
-            print($0.count)
-        }
+        print("\(desc) \r")
     }
     
     func printPositionOfFirstCollision() {
         var system = self
         var collisionPosition: Position? = nil
         while collisionPosition == nil {
-//            system.printState()
             collisionPosition = system.tick()
         }
         
@@ -310,16 +299,14 @@ struct System {
             // Update the count if a collision occurs
             if system.tick() != nil {
                 count = system.countTrains()
+                print(count)
             }
         }
         
         for (y, row) in system.map.enumerated() {
             for (x, piece) in row.enumerated() {
-                guard let track = piece as? Track else { continue }
-                guard track.train != nil else { continue }
-                
+                guard (piece as? Track)?.train != nil else { continue }
                 print("Position of last cart: \(x),\(y)")
-                
                 break
             }
         }
@@ -332,19 +319,23 @@ struct System {
 
 // Part 2
 
-//print("Enter filename")
-//let input = readLine() ?? ""
-//print(input)
-//let url = URL(fileURLWithPath: input)!
-//print("Url generated")
-//
+print("Enter filename")
+let input = readLine() ?? ""
+print(input)
+let url = URL(fileURLWithPath: input)
+print("Url generated")
+////
+////
+let system = System(fileUrl: url)
+//var system = System(filename: "input")
+//system.printState()
+//system.printState()
+//system.printState()
+//system.tick()
+//system.printState()
+//system.printPositionOfFirstCollision()
 
-//let system = System(fileUrl: url)
-var system = System(filename: "test-input")
-system.printState()
-system.tick()
-system.printState()
-//system.printPositionOfLastRemainingCart()
+system.printPositionOfLastRemainingCart()
 // Not 97,107
 
 
