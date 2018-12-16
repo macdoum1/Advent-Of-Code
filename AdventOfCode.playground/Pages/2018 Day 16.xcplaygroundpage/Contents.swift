@@ -104,13 +104,24 @@ struct Sample {
 
 struct Parser {
     static func getSamplesFromInput(_ input: String) -> [Sample] {
-        let lines = input.split(separator: "\n")
+        let chunks = input.components(separatedBy: "\n\n\n\n")
+        let lines = chunks.first!.split(separator: "\n")
         return stride(from: 0, to: lines.count, by: 3).map { (i) -> Sample in
             let line1 = String(lines[i])
             let line2 = String(lines[i+1])
             let line3 = String(lines[i+2])
             return Sample(line1: line1, line2: line2, line3: line3)
         }
+    }
+    
+    static func getRawInstructionsFromFilename(_ filename: String) -> [(opcode: Int, A: Int, B: Int, C: Int)] {
+        let input = inputFromFilename(filename)
+        let chunks = input.components(separatedBy: "\n\n\n\n")
+        let lines = chunks[1].split(separator: "\n")
+        return lines.map({ (line) -> (Int, Int, Int, Int) in
+            let numbers = line.split(separator: " ").map { Int($0)! }
+            return (numbers[0], numbers[1], numbers[2], numbers[3])
+        })
     }
     
     static func getSamplesFromFilename(_ filename: String) -> [Sample] {
@@ -132,28 +143,83 @@ let samples = Parser.getSamplesFromFilename("input")
 //"""
 //let samples = Parser.getSamplesFromInput(input)
 
+func part1() {
+    let allOpcodes = Opcode.allCases
+    var threePossibleOpcodeSum = 0
+    for sample in samples {
+        // Create instructions from all opcodes for sample
+        let instructions = allOpcodes.map {
+            Instruction(opcode: $0, A: sample.A, B: sample.B, C: sample.C)
+        }
+        
+        // Perform all instructions and collect only ones
+        // that match the output from the sample
+        let outputs = instructions.filter {
+            let output = $0.perform(initialRegisters: sample.initialRegisters)
+            return output == sample.afterRegisters
+        }
+        
+        if outputs.count >= 3 {
+            threePossibleOpcodeSum += 1
+        }
+    }
+    print(threePossibleOpcodeSum)
+}
 
-let allOpcodes = Opcode.allCases
+part1()
+// 663
 
-var threePossibleOpcodeSum = 0
-for sample in samples {
-    // Create instructions from all opcodes for sample
-    let instructions = allOpcodes.map {
-        Instruction(opcode: $0, A: sample.A, B: sample.B, C: sample.C)
+func part2() {
+    // Start with all opcodes for each index
+    var indicesToOpcodes = Array(repeating: Opcode.allCases, count: Opcode.allCases.count)
+    
+    // Iterate through all samples and remove the opcodes that don't
+    // result in behavior described by sample
+    for sample in samples {
+        indicesToOpcodes[sample.opcode].removeAll { (opcode) -> Bool in
+            let instruction = Instruction(opcode: opcode, A: sample.A, B: sample.B, C: sample.C)
+            let output = instruction.perform(initialRegisters: sample.initialRegisters)
+            return output != sample.afterRegisters
+        }
     }
     
-    // Perform all instructions and collect only ones
-    // that match the output from the sample
-    let outputs = instructions.filter {
-        let output = $0.perform(initialRegisters: sample.initialRegisters)
-        return output == sample.afterRegisters
+    // If any of the indices have a single opcode,
+    // we know its correct
+    var map = indicesToOpcodes.enumerated().reduce([Int: Opcode]()) { (result, value) -> [Int: Opcode] in
+        var tempResult = result
+        tempResult[value.offset] = value.element.count > 1 ? nil : value.element.first!
+        return tempResult
     }
     
-    if outputs.count >= 3 {
-        threePossibleOpcodeSum += 1
+    var confirmedOpcodes = Array(map.values)
+    
+    // Now we'll iterate through `indicesToOpcodes` removing
+    // confirmed opcodes until we have no more to remove
+    // At the end of iteration the `map` should be built
+    while let confirmedOpcode = confirmedOpcodes.popLast() {
+        for index in 0..<indicesToOpcodes.count {
+            indicesToOpcodes[index].removeAll { $0 == confirmedOpcode }
+            if indicesToOpcodes[index].count == 1 {
+                let newConfirmedOpcode = indicesToOpcodes[index].first!
+                map[index] = newConfirmedOpcode
+                confirmedOpcodes.append(newConfirmedOpcode)
+            }
+        }
+    }
+    
+    let rawInstructions = Parser.getRawInstructionsFromFilename("input")
+    
+    let instructions = rawInstructions.map {
+        Instruction(opcode: map[$0.opcode]!, A: $0.A, B: $0.B, C: $0.C)
+    }
+        
+    var registers = [0, 0, 0, 0]
+    for instruction in instructions {
+        registers = instruction.perform(initialRegisters: registers)
     }
 }
 
-print(threePossibleOpcodeSum)
+part2()
+// [525, 3, 0, 525]
 
 //: [Next](@next)
