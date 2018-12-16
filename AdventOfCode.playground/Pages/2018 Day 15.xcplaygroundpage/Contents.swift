@@ -111,9 +111,18 @@ struct Cave: GraphDatasource {
     /// Performs a single round for all units
     ///
     /// - Returns: True is targets remain
-    mutating func performRound() -> Bool {
+    mutating func performRound(elfAttack: Int=3) -> Bool {
         // Get all units in reading order
         var units = allUnitsInReadingOrder()
+        
+        for i in 0..<units.count {
+            let piece = units[i]
+            guard var elf = piece.1 as? Elf else { continue }
+            
+            elf.attackPower = elfAttack
+            units[i].1 = elf
+            map[piece.0.y][piece.0.x] = elf
+        }
         
         var targetsRemain = true
         
@@ -169,6 +178,12 @@ struct Cave: GraphDatasource {
         }.reduce(0, +)
     }
     
+    func sumOfRemainingElfs() -> Int {
+        return map.map {
+            return $0.filter { $0 is Elf }.count
+        }.reduce(0, +)
+    }
+    
     private mutating func performAttackIfNecessary(unit: (Position, Unit),
                                                    units: inout [(Position, Unit)],
                                                    unitIndex: inout Int) -> Bool {
@@ -213,7 +228,6 @@ struct Cave: GraphDatasource {
             } else {
                 return nil
             }
-
         }
         
         guard let minimumHPAmongstEnemies = enemiesWithinRange.min(by: { (a, b) -> Bool in
@@ -387,23 +401,28 @@ let input = """
 """
 
 var cave = Cave(input: input)
-cave.debugMode = true
 
-print("Initial")
-cave.printState()
+let initialElves = cave.sumOfRemainingElfs()
 
-var round = 0
-while cave.performRound() {
-    print("After round \(round+1)")
+for power in 3..<20 {
+    print("Trying power \(power)")
+    var round = 0
+    while cave.performRound(elfAttack: power) {
+        round += 1
+    }
     cave.printState()
-    round += 1
+    
+    print("Remaining hitpoints: \(cave.sumOfRemainingHitpoints())")
+    let outcome = round * cave.sumOfRemainingHitpoints()
+    print("Outcome: \(outcome)")
+    print("Remaining elfs: \(cave.sumOfRemainingElfs())")
+    
+    if cave.sumOfRemainingElfs() == initialElves {
+        break
+    }
+    
+    cave = Cave(input: input)
+    
+    print("\n")
 }
-cave.printState()
-
-print(round)
-print(cave.sumOfRemainingHitpoints())
-print(round*cave.sumOfRemainingHitpoints())
-
-// 209666 is too high
-
 //: [Next](@next)
