@@ -135,33 +135,73 @@ let instructions = lines.map { (line) -> Instruction in
     return Instruction(opcode: opcode, A: A, B: B, C: C)
 }
 
+func part1() {
+    var registers = [0, 0, 0, 0, 0, 0]
+    print("Initial")
+    print(registers)
 
-var registers = [0, 0, 0, 0, 0, 0]
-print("Initial")
-print(registers)
+    var instructionPointer = 0
 
-var instructionPointer = 0
+    while instructionPointer < instructions.count {
+        // Load instruction pointer in register
+        registers[ipRegister] = instructionPointer
+        
+        // Perform instrution
+        let instruction = instructions[instructionPointer]
+        print(instruction)
+        registers = instruction.perform(initialRegisters: registers)
+        
+        // Load instruction pointer from register
+        instructionPointer = registers[ipRegister]
+        
+        // Increment
+        instructionPointer += 1
+        
+        print("IP: \(instructionPointer) Registers: \(registers)")
+    }
 
-while instructionPointer < instructions.count {
-    // Load instruction pointer in register
-    registers[ipRegister] = instructionPointer
-    
-    // Perform instrution
-    let instruction = instructions[instructionPointer]
-    print(instruction)
-    registers = instruction.perform(initialRegisters: registers)
-    
-    // Load instruction pointer from register
-    instructionPointer = registers[ipRegister]
-    
-    // Increment
-    instructionPointer += 1
-    
-    print("IP: \(instructionPointer) Registers: \(registers)")
+    print("After")
+    print(registers)
 }
 
-print("After")
-print(registers)
+func part2() {
+    var registers = [1, 0, 0, 0, 0, 0]
+    var instructionPointer = 0
+    while instructionPointer != 1 {
+        // Load instruction pointer in register
+        registers[ipRegister] = instructionPointer
+        
+        // Perform instrution
+        let instruction = instructions[instructionPointer]
+        registers = instruction.perform(initialRegisters: registers)
+        
+        // Load instruction pointer from register
+        instructionPointer = registers[ipRegister]
+        
+        // Increment
+        instructionPointer += 1
+    }
+    
+    // The value in the last register appears constant after
+    // the IP is 1
+    // and appears to the be the condition for the loop
+    // to exit
+    let importantValue = registers[5]
+    print("Important Value \(importantValue)")
+
+    // It looks like the underlying loop is trying to get
+    // sum of all factors. Let's iterate through all factors
+    // up to (and including) sqrt(n).
+    let squareOfImportantValue = Int(Double(importantValue).squareRoot())
+    let sumOfFactors = (1...squareOfImportantValue).map {
+        guard importantValue % $0 == 0 else { return 0 }
+        return (importantValue / $0 != $0) ? importantValue/$0 + $0 : $0
+    }.reduce(0, +)
+    print("Sum of all factors (register 0):\(sumOfFactors)")
+}
+part2()
+//18964204
+
 
 
 
