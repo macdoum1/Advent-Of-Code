@@ -7,12 +7,6 @@ protocol MapPiece {
     var characterDescription: Character { get }
 }
 
-extension Collection {
-    subscript (safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
-
 struct System {
     typealias Position = (x: Int, y: Int)
     struct Train: MapPiece {

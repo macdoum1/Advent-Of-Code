@@ -8,12 +8,6 @@ enum Piece: Character {
     case lumberyard = "#"
 }
 
-extension Collection {
-    subscript (safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
-
 extension Array where Element == [Piece] {
     subscript(x: Int, y: Int) -> Piece? {
         get {

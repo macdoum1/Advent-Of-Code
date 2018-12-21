@@ -6,14 +6,6 @@ import UIKit
 // Day 6
 
 // *** Shared ***
-extension Array where Element: Equatable {
-    func indiciesWhere(_ filter: ((Element) -> Bool)) -> [Int] {
-        return self.indices.filter {
-            return filter(self[$0])
-        }
-    }
-}
-
 struct List {
     typealias Coordinate = (x: Int, y: Int)
     let coordinates: [Coordinate]

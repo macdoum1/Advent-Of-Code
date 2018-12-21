@@ -2,15 +2,6 @@
 
 import Foundation
 
-struct Position: Hashable {
-    let x: Int
-    let y: Int
-    
-    func adding(_ position: Position) -> Position {
-        return Position(x: x+position.x, y: y+position.y)
-    }
-}
-
 enum RegexChar: Character {
     case north = "N"
     case east = "E"

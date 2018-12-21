@@ -2,25 +2,6 @@
 
 import Foundation
 
-extension Array where Element: Equatable {
-    func indiciesWhere(_ filter: ((Element) -> Bool)) -> [Int] {
-        return self.indices.filter {
-            return filter(self[$0])
-        }
-    }
-}
-
-extension Collection {
-    subscript (safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
-
-struct Position: Hashable {
-    let x: Int
-    let y: Int
-}
-
 // Protocols
 protocol GraphDatasource {
     var map: [[MapPiece]] { get }
