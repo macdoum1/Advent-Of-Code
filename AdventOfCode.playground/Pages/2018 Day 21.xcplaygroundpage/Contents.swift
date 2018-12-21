@@ -120,46 +120,45 @@ let instructions = lines.map { (line) -> Instruction in
 }
 
 func part1() {
-    var registers = [0, 0, 0, 0, 0, 0]
-    print("Initial")
-    print(registers)
-    
-    var instructionPointer = 0
-    
     let equalityInstructionIndex = instructions.firstIndex {
         $0.opcode == .equalRegisterRegister
     }!
+    print("Magic Index: \(equalityInstructionIndex)")
     
-    var seenValues = Set<Int>()
+    var registers = [0, 0, 0, 0, 0, 0]
+    var results = Set<Int>()
+    var foundFirst = false
+    var lastFound = 0
     
-    while instructionPointer < instructions.count {
+    while registers[ipRegister] < instructions.count {
         if registers[ipRegister] == equalityInstructionIndex {
-//            print("Reached here")
-//            print("Registers \(registers)")
-            if seenValues.insert(registers[4]).inserted {
-                print(seenValues)
+            let magicValue = registers[4]
+            
+            if results.contains(magicValue) {
+                print("Found value in set")
                 break
             }
+            
+            if !foundFirst {
+                foundFirst = true
+                print("Part 1: \(magicValue)")
+            }
+            
+            lastFound = magicValue
+            results.insert(magicValue)
         }
-        // Load instruction pointer in register
-        registers[ipRegister] = instructionPointer
         
         // Perform instrution
-        let instruction = instructions[instructionPointer]
-//        print(instruction)
+        let instruction = instructions[registers[ipRegister]]
         registers = instruction.perform(initialRegisters: registers)
         
-        // Load instruction pointer from register
-        instructionPointer = registers[ipRegister]
-        
         // Increment
-        instructionPointer += 1
-        
-//        print("IP: \(instructionPointer) Registers: \(registers)")
+        registers[ipRegister] += 1
     }
     
     print("After")
     print(registers)
+    print("Part 2: \(lastFound)")
 }
 
 part1()
