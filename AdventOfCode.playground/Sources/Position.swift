@@ -20,6 +20,10 @@ public struct Position: Hashable {
         return Position(x: x, y: y+1)
     }
     
+    public var above: Position {
+        return Position(x: x, y: y-1)
+    }
+    
     public func adding(_ position: Position) -> Position {
         return Position(x: x+position.x, y: y+position.y)
     }
