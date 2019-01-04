@@ -56,7 +56,6 @@ struct BotFinder {
             if let bot = Nanobot(string: $0) {
                 return bot
             } else {
-                print("excluded |\($0)|")
                 return nil
             }
         }
@@ -77,6 +76,69 @@ struct BotFinder {
             return distance <= bot.signalRadius
         }.count
     }
+    
+    func part2() -> Int {
+        let xValues = bots.map { $0.position.x }
+        let yValues = bots.map { $0.position.y }
+        let zValues = bots.map { $0.position.z }
+        
+        var bestGrid: (x: Int, y: Int, z: Int)? = nil
+        
+        var xMin = xValues.min()!
+        var xMax = xValues.max()!
+        var yMin = yValues.min()!
+        var yMax = yValues.max()!
+        var zMin = zValues.min()!
+        var zMax = zValues.max()!
+        
+        var gridSize = xMax - xMin
+        while gridSize > 0 {
+            var maxCount = 0
+            for x in stride(from: xMin, to: xMax, by: gridSize) {
+                for y in stride(from: yMin, to: yMax, by: gridSize) {
+                    for z in stride(from: zMin, to: zMax, by: gridSize) {
+                        var count = 0
+                        for bot in bots {
+                            let xDiff = (bot.position.x - x)
+                            let yDiff = (bot.position.y - y)
+                            let zDiff = (bot.position.z - z)
+                            let distance = abs(xDiff) + abs(yDiff) + abs(zDiff)
+                            if distance - bot.signalRadius < gridSize {
+                                count += 1
+                            }
+                        }
+                        
+                        if maxCount < count {
+                            maxCount = count
+                            bestGrid = (x, y, z)
+                        } else if maxCount == count {
+                            if bestGrid == nil || manhattanDistance(x: x, y: y, z: z) < manhattanDistance(x: bestGrid?.x ?? 0, y: bestGrid?.y ?? 0, z: bestGrid?.z ?? 0) {
+                                bestGrid = (x, y, z)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            xMin = bestGrid?.x ?? 0 - gridSize
+            xMax = bestGrid?.x ?? 0 + gridSize
+            
+            yMin = bestGrid?.y ?? 0 - gridSize
+            yMax = bestGrid?.y ?? 0 + gridSize
+            
+            zMin = bestGrid?.z ?? 0 - gridSize
+            zMax = bestGrid?.z ?? 0 + gridSize
+            
+            gridSize = Int(floor(Double(gridSize) / 2.0))
+        }
+        
+        return manhattanDistance(x: bestGrid!.x, y: bestGrid!.y, z: bestGrid!.z)
+    }
+    
+    func manhattanDistance(x: Int, y: Int, z: Int) -> Int {
+        return abs(x) + abs(y) + abs(z)
+    }
+    
 }
 
 let input = """
@@ -95,4 +157,7 @@ let botFinder = BotFinder(filename: "input")
 let largestSignalBot = botFinder.botWithLargestSignal
 let numberOfBotsWithinRange = botFinder.numberOfBotsWithinRange(of: largestSignalBot)
 // 595
+
+botFinder.part2()
+// 28479189 too low
 //: [Next](@next)
